@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/layoutBg"
+    android:layout_margin="10dp"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_gravity="center"
+        android:layout_margin="10dp"
+        tools:context=".MainActivity">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#51A1E1"
+            android:padding="5dp"
+            android:layout_marginBottom="5dp">
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/name1"
+                android:hint="Name 1"
+                android:padding="10dp"
+                android:layout_margin="5dp"
+                android:background="@color/inputBg"/>
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/phone1"
+                android:hint="Phone 1"
+                android:inputType="phone"
+                android:padding="10dp"
+                android:layout_margin="5dp"
+                android:background="@color/inputBg"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_marginBottom="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#51A1E1"
+            android:padding="5dp">
+
+            <EditText android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/name2"
+                android:hint="Name 2"
+                android:padding="10dp"
+                android:layout_margin="5dp"
+                android:background="@color/inputBg"/>
+
+            <EditText android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/phone2"
+                android:hint="Phone 2"
+                android:inputType="phone"
+                android:padding="10dp"
+                android:layout_margin="5dp"
+                android:background="@color/inputBg"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#51A1E1"
+            android:padding="5dp"
+            android:layout_marginBottom="5dp">
+            <EditText android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/name3"
+                android:hint="Name 3"
+                android:padding="10dp"
+                android:layout_margin="5dp"
+                android:background="@color/inputBg"/>
+            <EditText android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/phone3"
+                android:hint="Phone 3"
+                android:inputType="phone"
+                android:padding="10dp"
+                android:layout_margin="5dp"
+                android:background="@color/inputBg"/>
+
+        </LinearLayout>
+
+        <Button android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnSend"
+            android:text="Send to ESP32"
+            android:padding="10dp"
+            android:layout_margin="5dp"
+            android:backgroundTint="@color/btnBg"/>
+        <Button android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnConnect"
+            android:text="Connect Bluetooth (MAC)"
+            android:padding="10dp"
+            android:layout_margin="5dp"
+            android:backgroundTint="@color/btnBg"/>
+
+    </LinearLayout>
+
+</ScrollView>

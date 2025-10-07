@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "216006994499",
+    "firebase_url": "https://sheild-1280c-default-rtdb.firebaseio.com",
+    "project_id": "sheild-1280c",
+    "storage_bucket": "sheild-1280c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:216006994499:android:2b203f41b17484ccd482f6",
+        "android_client_info": {
+          "package_name": "com.lucky.sheild"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUVvu3vrx0BQcNAvLZtskGgCX9O3yUwUc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

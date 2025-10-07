@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/layoutBg"
+    android:padding="10dp"
+    android:layout_margin="10dp"
+    android:gravity="center"
+    tools:context=".AdminActivity">
+
+
+    <EditText android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/adminEmail"
+        android:hint="New user email"
+        android:padding="10dp"
+        android:layout_margin="5dp"
+        android:background="@color/inputBg"/>
+    <EditText android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/adminPassword"
+        android:hint="Initial password"
+        android:inputType="textPassword"
+        android:padding="10dp"
+        android:layout_margin="5dp"
+        android:background="@color/inputBg"/>
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:layout_margin="5dp"
+        android:id="@+id/spinnerRole"/> <!-- user or admin -->
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnCreateUser"
+        android:text="Create User (secure)"
+        android:padding="10dp"
+        android:layout_margin="5dp"
+        android:backgroundTint="@color/btnBg"/>
+
+    <Button
+        android:id="@+id/btnLogout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Logout"
+        android:layout_marginTop="16dp" />
+
+</LinearLayout>
