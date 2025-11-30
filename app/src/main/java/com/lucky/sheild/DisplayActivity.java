@@ -1,29 +1,26 @@
 package com.lucky.sheild;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.*;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class DisplayActivity extends AppCompatActivity {
-    private ListView listView;
-    private Button btnOpenMain, btnLogout;
-    private DatabaseReference sentRef;
-    private String uid;
-    private List<String> displayList = new ArrayList<>();
-    private List<String> phoneList = new ArrayList<>();
-    private ArrayAdapter<String> adapter;
+    ListView contactList;
+    ArrayList<String> listData;
+    ArrayAdapter<String> adapter;
+    Button btnOpenMain,logoutBtn;
     private FirebaseAuth auth;
 
     @Override
@@ -31,57 +28,75 @@ public class DisplayActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display);
 
-        listView = findViewById(R.id.listView);
-        btnOpenMain = findViewById(R.id.btnOpenMain);
-        btnLogout = findViewById(R.id.logout); // ✅ make sure you add this button in XML
+        btnOpenMain=findViewById(R.id.btnOpenMain);
+        logoutBtn=findViewById(R.id.logoutBtn);
+
+        contactList = findViewById(R.id.listView);
+
+        listData = new ArrayList<>();
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listData);
+        contactList.setAdapter(adapter);
         auth = FirebaseAuth.getInstance();
 
-        uid = auth.getCurrentUser().getUid();
-        sentRef = FirebaseDatabase.getInstance().getReference("sentLogs").child(uid);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, displayList);
-        listView.setAdapter(adapter);
-
-        btnOpenMain.setOnClickListener(v -> startActivity(new Intent(this, MainActivity.class)));
-
-        // ✅ Logout button functionality
-        btnLogout.setOnClickListener(v -> {
-            auth.signOut();
-            Toast.makeText(DisplayActivity.this, "Logged out successfully", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(DisplayActivity.this, LoginActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Prevent going back
-            startActivity(intent);
+        if (user == null) {
+            Toast.makeText(this, "User not logged in!", Toast.LENGTH_LONG).show();
             finish();
-        });
+            return;
+        }
 
-        sentRef.addValueEventListener(new ValueEventListener() {
+        btnOpenMain.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(DisplayActivity.this, MainActivity.class));
+            }
+        });
+        logoutBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                auth.signOut();
+                Toast.makeText(DisplayActivity.this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(DisplayActivity.this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Prevent going back
+                startActivity(intent);
+                finish();
+            }
+        });
+        // Load contacts using UID
+        loadContacts(user.getUid());
+    }
+
+    private void loadContacts(String uid) {
+        FirebaseDatabase db = FirebaseDatabase.getInstance();
+
+        // 🔥 Correct path (matches your rules)
+        DatabaseReference ref = db.getReference("users")
+                .child(uid)
+                .child("contacts");
+
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-                displayList.clear();
-                phoneList.clear();
-                for (DataSnapshot s : snapshot.getChildren()) {
-                    Map<String, Object> map = (Map<String, Object>) s.getValue();
-                    if (map == null) continue;
-                    Object phonesO = map.get("phones");
-                    Object namesO = map.get("names");
-                    String item = "Phones: " + phonesO + ", Names: " + namesO;
-                    displayList.add(item);
-                    phoneList.add(phonesO != null ? phonesO.toString() : "N/A");
+
+                listData.clear();
+
+                for (DataSnapshot c : snapshot.getChildren()) {
+                    String name = c.child("name").getValue(String.class);
+                    String phone = c.child("phone").getValue(String.class);
+
+                    listData.add("Name: " + name + "\nPhone: " + phone);
                 }
+
                 adapter.notifyDataSetChanged();
             }
 
             @Override
-            public void onCancelled(DatabaseError error) {}
-        });
-
-        listView.setOnItemLongClickListener((parent, view, position, id) -> {
-            String phone = phoneList.get(position);
-            Intent i = new Intent(DisplayActivity.this, EditNameActivity.class);
-            i.putExtra("phone", phone);
-            startActivity(i);
-            Toast.makeText(DisplayActivity.this, "Editing: " + phone, Toast.LENGTH_SHORT).show();
-            return true;
+            public void onCancelled(DatabaseError error) {
+                Toast.makeText(DisplayActivity.this,
+                        "Error loading contacts: " + error.getMessage(),
+                        Toast.LENGTH_LONG).show();
+            }
         });
     }
 }

@@ -95,18 +95,24 @@
                 android:background="@color/inputBg"/>
 
         </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/noUpdateTxt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/underline"
+                android:textSize="20sp"
+                android:padding="5dp"
+                android:gravity="center"/>
+        </LinearLayout>
 
         <Button android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/btnSend"
-            android:text="Send to ESP32"
-            android:padding="10dp"
-            android:layout_margin="5dp"
-            android:backgroundTint="@color/btnBg"/>
-        <Button android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/btnConnect"
-            android:text="Connect Bluetooth (MAC)"
+            android:text="Send to Database"
             android:padding="10dp"
             android:layout_margin="5dp"
             android:backgroundTint="@color/btnBg"/>
