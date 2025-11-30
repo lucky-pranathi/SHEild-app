@@ -11,7 +11,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
-
 import androidx.annotation.Nullable;
 
 import java.io.IOException;
@@ -20,17 +19,16 @@ import java.io.OutputStream;
 import java.util.UUID;
 
 public class BluetoothService extends Service {
-    private static final String TAG = "BluetoothService";
-    private final IBinder binder = new LocalBinder();
+
+    private static final UUID SPP_UUID =
+            UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+
     private BluetoothSocket socket;
     private BluetoothAdapter adapter;
     private ConnectedThread connectedThread;
 
-    // Standard SPP UUID for ESP32
-    private static final UUID SPP_UUID =
-            UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-
-    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private final IBinder binder = new LocalBinder();
+    private final Handler main = new Handler(Looper.getMainLooper());
 
     public class LocalBinder extends Binder {
         public BluetoothService getService() {
@@ -44,38 +42,44 @@ public class BluetoothService extends Service {
         return binder;
     }
 
-    // Connect to given MAC address
-    public boolean connectToDevice(String macAddress) {
+    // ---------------------- CONNECT -------------------------
+    public void broadcastStatus(String msg) {
+        Intent i = new Intent("BT_STATUS");
+        i.putExtra("status", msg);
+        sendBroadcast(i);
+    }
+
+    public boolean connectToDevice(String mac) {
         adapter = BluetoothAdapter.getDefaultAdapter();
+
         if (adapter == null) {
-            showToast("Bluetooth not supported on this device");
-            Log.e(TAG, "Bluetooth not supported");
+            broadcastStatus("Bluetooth unsupported");
             return false;
         }
-
         if (!adapter.isEnabled()) {
-            showToast("Please enable Bluetooth first");
-            Log.e(TAG, "Bluetooth not enabled");
+            broadcastStatus("Enable Bluetooth first");
             return false;
         }
 
-        BluetoothDevice device = adapter.getRemoteDevice(macAddress);
+        BluetoothDevice device = adapter.getRemoteDevice(mac);
+
         try {
             socket = device.createRfcommSocketToServiceRecord(SPP_UUID);
             adapter.cancelDiscovery();
-            showToast("Connecting to " + macAddress + "...");
+
+            broadcastStatus("Connecting to ESP32…");
+
             socket.connect();
 
             connectedThread = new ConnectedThread(socket);
             connectedThread.start();
 
-            showToast("✅ Connected successfully to " + device.getName());
-            Log.i(TAG, "Connected to " + macAddress);
+            broadcastStatus("Connected to ESP32");
+
             return true;
 
-        } catch (IOException e) {
-            showToast("❌ Connection failed: " + e.getMessage());
-            Log.e(TAG, "Connection failed", e);
+        } catch (Exception e) {
+            broadcastStatus("Connection failed");
             closeSocket();
             return false;
         }
@@ -85,81 +89,59 @@ public class BluetoothService extends Service {
         return socket != null && socket.isConnected();
     }
 
-    public void send(String message) {
-        if (connectedThread != null) {
-            connectedThread.write(message.getBytes());
-        } else {
-            showToast("Not connected to any device");
-            Log.e(TAG, "Not connected, cannot send");
-        }
+    public void send(String msg) {
+        if (connectedThread != null)
+            connectedThread.write(msg.getBytes());
+        else broadcastStatus("Not connected");
     }
 
     public void closeSocket() {
         try {
-            if (connectedThread != null) connectedThread.cancel();
+            if (connectedThread != null)
+                connectedThread.cancel();
             if (socket != null) socket.close();
-            showToast("Bluetooth disconnected");
-        } catch (IOException e) {
-            showToast("Error closing connection: " + e.getMessage());
-        } finally {
-            socket = null;
-            connectedThread = null;
-        }
+        } catch (Exception ignored) {}
+        connectedThread = null;
+        socket = null;
     }
 
+    // ---------------------- DATA THREAD ----------------------
     private class ConnectedThread extends Thread {
         private final InputStream in;
         private final OutputStream out;
 
-        ConnectedThread(BluetoothSocket socket) throws IOException {
-            in = socket.getInputStream();
-            out = socket.getOutputStream();
+        ConnectedThread(BluetoothSocket s) throws IOException {
+            in = s.getInputStream();
+            out = s.getOutputStream();
         }
 
+        @Override
         public void run() {
             byte[] buffer = new byte[1024];
             int bytes;
-            while (true) {
-                try {
+            try {
+                while (true) {
                     bytes = in.read(buffer);
                     if (bytes > 0) {
-                        final String received = new String(buffer, 0, bytes);
-                        Log.d(TAG, "Received: " + received);
-
-                        Intent i = new Intent("BT_RECEIVED");
-                        i.putExtra("data", received);
-                        sendBroadcast(i);
+                        String data = new String(buffer, 0, bytes);
+                        Log.d("BT", "Received: " + data);
                     }
-                } catch (IOException e) {
-                    showToast("⚠️ Connection lost: " + e.getMessage());
-                    Log.e(TAG, "Disconnected", e);
-                    break;
                 }
+            } catch (IOException e) {
+                broadcastStatus("Connection lost");
             }
         }
 
-        void write(byte[] bytes) {
+        void write(byte[] b) {
             try {
-                out.write(bytes);
-            } catch (IOException e) {
-                showToast("Write failed: " + e.getMessage());
-                Log.e(TAG, "Write failed", e);
+                out.write(b);
+            } catch (Exception e) {
+                broadcastStatus("Write failed");
             }
         }
 
         void cancel() {
-            try {
-                socket.close();
-            } catch (IOException e) {
-                // Ignore
-            }
+            try { socket.close(); } catch (Exception ignored) {}
         }
-    }
-
-    // Helper method for Toast
-    private void showToast(final String message) {
-        mainHandler.post(() ->
-                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show()
-        );
     }
 }
